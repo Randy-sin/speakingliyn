@@ -59,17 +59,21 @@ class ChatViewModel: ObservableObject {
     
     func startRecording() {
         guard !isRecording else { return }
-        print("[Voice] startRecording tapped")
+        
+        // 立即更新UI状态，提供即时反馈
+        isRecording = true
+        print("[Voice] startRecording tapped - UI updated immediately")
+        
         Task {
             do {
                 let url = try await recorderService.startRecording()
                 await MainActor.run {
                     self.currentRecordingURL = url
-                    self.isRecording = true
                     print("[Voice] recording started, file: \(url.path)")
                 }
             } catch {
                 await MainActor.run {
+                    self.isRecording = false // 恢复状态
                     self.errorMessage = "录音失败：\(error.localizedDescription)"
                 }
                 print("[Voice][Error] startRecording failed: \(error)")
@@ -109,10 +113,19 @@ class ChatViewModel: ObservableObject {
     }
     
     func cancelRecording() {
-        print("[Voice] cancelRecording")
-        recorderService.cancelRecording()
-        currentRecordingURL = nil
+        guard isRecording else { return }
+        
+        // 立即更新UI状态
         isRecording = false
+        print("[Voice] cancelRecording - UI updated immediately")
+        
+        Task {
+            await recorderService.cancelRecording()
+            await MainActor.run {
+                self.currentRecordingURL = nil
+                print("[Voice] recording cancelled")
+            }
+        }
     }
     
     func clearChat() {

@@ -9,15 +9,12 @@ import Foundation
 
 private struct QwenASRRequest: Encodable {
     let model: String
+    let input: ASRInput
+    let parameters: ASRParameters
+}
+
+private struct ASRInput: Encodable {
     let messages: [ASRMessage]
-    let resultFormat: String
-    let asrOptions: ASROptions
-    
-    enum CodingKeys: String, CodingKey {
-        case model, messages
-        case resultFormat = "result_format"
-        case asrOptions = "asr_options"
-    }
 }
 
 private struct ASRMessage: Encodable {
@@ -40,6 +37,14 @@ private struct ASRContent: Encodable {
     }
 }
 
+private struct ASRParameters: Encodable {
+    let asrOptions: ASROptions
+    
+    enum CodingKeys: String, CodingKey {
+        case asrOptions = "asr_options"
+    }
+}
+
 private struct ASROptions: Encodable {
     let enableLid: Bool
     let enableItn: Bool
@@ -58,7 +63,8 @@ protocol QwenASRServiceProtocol {
 
 final class QwenASRService: QwenASRServiceProtocol {
     private let session: URLSession
-    private let baseURL = URL(string: "https://dashscope.aliyuncs.com/compatible-mode/v1/multimodal-conversation")!
+    // 使用正确的端点
+    private let baseURL = URL(string: "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation")!
     private let apiKey: String
     private let fileUploadService: FileUploadServiceProtocol
     
@@ -84,18 +90,21 @@ final class QwenASRService: QwenASRServiceProtocol {
         
         print("[ASR] Public URL: \(publicURL.absoluteString)")
         
-        // 构造请求体，严格按照官方文档格式
+        // 使用正确的请求体结构
         let requestBody = QwenASRRequest(
             model: "qwen3-asr-flash",
-            messages: [
-                ASRMessage(role: "system", content: [ASRContent(text: "")]),
-                ASRMessage(role: "user", content: [ASRContent(audioURL: publicURL.absoluteString)])
-            ],
-            resultFormat: "message",
-            asrOptions: ASROptions(
-                enableLid: language == nil,
-                enableItn: false,
-                language: language
+            input: ASRInput(
+                messages: [
+                    ASRMessage(role: "system", content: [ASRContent(text: "")]),
+                    ASRMessage(role: "user", content: [ASRContent(audioURL: publicURL.absoluteString)])
+                ]
+            ),
+            parameters: ASRParameters(
+                asrOptions: ASROptions(
+                    enableLid: language == nil,
+                    enableItn: false,
+                    language: language
+                )
             )
         )
         
@@ -105,6 +114,7 @@ final class QwenASRService: QwenASRServiceProtocol {
         let requestData = try encoder.encode(requestBody)
         let requestString = String(data: requestData, encoding: .utf8) ?? "无法编码请求体"
         print("[ASR] Request Body:\n\(requestString)")
+        print("[ASR] API Endpoint: \(baseURL.absoluteString)")
         
         var request = URLRequest(url: baseURL)
         request.httpMethod = "POST"
@@ -132,7 +142,7 @@ final class QwenASRService: QwenASRServiceProtocol {
         
         print("[ASR] Full response: \(json)")
         
-        // 尝试多种可能的响应格式
+        // 解析正确的响应格式：output.choices[0].message.content[0].text
         if let output = json["output"] as? [String: Any],
            let choices = output["choices"] as? [[String: Any]],
            let firstChoice = choices.first,
@@ -144,12 +154,6 @@ final class QwenASRService: QwenASRServiceProtocol {
                     return text
                 }
             }
-        }
-        
-        // 备用解析方式
-        if let output = json["output"] as? [String: Any],
-           let text = output["text"] as? String {
-            return text
         }
         
         throw NSError(domain: "QwenASRService", code: -4, userInfo: [NSLocalizedDescriptionKey: "无法从响应中提取识别文本"])
