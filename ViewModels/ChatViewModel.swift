@@ -29,9 +29,9 @@ class ChatViewModel: ObservableObject {
     
     // MARK: - Init
     init(
-        aiService: AIServiceProtocol = QwenChatService(),
-        audioPlayerService: AudioServiceProtocol = AudioService(),
-        streamingASRService: StreamingASRServiceProtocol = StreamingASRService()
+        aiService: AIServiceProtocol,
+        audioPlayerService: AudioServiceProtocol,
+        streamingASRService: StreamingASRServiceProtocol
     ) {
         self.aiService = aiService
         self.audioPlayerService = audioPlayerService
@@ -166,19 +166,22 @@ class ChatViewModel: ObservableObject {
     }
     
     private func setupStreamingASRCallbacks() {
-        // 部分识别结果回调（实时显示，可选）
+        // 部分识别结果回调（立即触发界面关闭）
         streamingASRService.onPartialResult = { [weak self] partialText in
-            print("[StreamASR] 部分结果: \(partialText)")
-            // 可以选择在UI中显示实时识别结果
+            print("[StreamASR] 检测到断句，立即关闭界面: \(partialText)")
+            Task {
+                await MainActor.run {
+                    self?.isRecording = false  // 立即关闭语音界面
+                }
+            }
         }
         
-        // 最终识别结果回调（自动触发AI回复）
+        // 最终识别结果回调（后台识别完成，添加消息并触发AI回复）
         streamingASRService.onFinalResult = { [weak self] finalText in
-            print("[StreamASR] 最终结果: \(finalText)")
+            print("[StreamASR] 后台识别完成: \(finalText)")
             Task {
                 await MainActor.run {
                     guard let self = self else { return }
-                    self.isRecording = false
                     
                     if !finalText.isEmpty {
                         let userMessage = Message(text: finalText, isFromUser: true)

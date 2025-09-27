@@ -8,9 +8,13 @@
 import SwiftUI
 
 struct ChatView: View {
-    @StateObject private var viewModel = ChatViewModel()
+    @StateObject private var viewModel: ChatViewModel
     @State private var showingVoiceAssistant = false
     @Environment(\.dismiss) private var dismiss
+    
+    init() {
+        self._viewModel = StateObject(wrappedValue: ServiceContainer.shared.makeChatViewModel())
+    }
     
     var body: some View {
         NavigationView {

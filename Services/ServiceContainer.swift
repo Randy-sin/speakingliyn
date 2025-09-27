@@ -2,18 +2,17 @@
 //  ServiceContainer.swift
 //  speaking
 //
-//  Created by Randy on 24/9/2025.
+//  Created by Randy on 25/9/2025.
 //
 
 import Foundation
 import SwiftUI
 
-// MARK: - Service Container
 @MainActor
 class ServiceContainer: ObservableObject {
     static let shared = ServiceContainer()
     
-    // MARK: - Services
+    // 单例服务
     lazy var userService: UserServiceProtocol = UserService()
     lazy var aiService: AIServiceProtocol = QwenChatService()
     lazy var audioPlayerService: AudioServiceProtocol = AudioService()
@@ -24,7 +23,7 @@ class ServiceContainer: ObservableObject {
     
     private init() {}
     
-    // MARK: - Factory Methods
+    // ViewModel工厂方法
     func makeHomeViewModel() -> HomeViewModel {
         HomeViewModel(userService: userService)
     }
@@ -42,13 +41,12 @@ class ServiceContainer: ObservableObject {
     }
 }
 
-// MARK: - Environment Key
-struct ServiceContainerKey: EnvironmentKey {
-    static let defaultValue = ServiceContainer.shared
-}
-
-// MARK: - Environment Values Extension
+// MARK: - Environment注入
 extension EnvironmentValues {
+    private struct ServiceContainerKey: EnvironmentKey {
+        static let defaultValue = ServiceContainer.shared
+    }
+    
     var serviceContainer: ServiceContainer {
         get { self[ServiceContainerKey.self] }
         set { self[ServiceContainerKey.self] = newValue }
