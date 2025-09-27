@@ -29,9 +29,12 @@ class ChatViewModel: ObservableObject {
     
     // MARK: - Init
     init(
-        aiService: AIServiceProtocol,
-        audioPlayerService: AudioServiceProtocol,
-        streamingASRService: StreamingASRServiceProtocol
+        aiService: AIServiceProtocol = QwenChatService(),
+        audioPlayerService: AudioServiceProtocol = AudioService(),
+        streamingASRService: StreamingASRServiceProtocol = StreamingASRService(
+            asrService: QwenASRService(fileUploadService: FileUploadService()),
+            fileUploadService: FileUploadService()
+        )
     ) {
         self.aiService = aiService
         self.audioPlayerService = audioPlayerService
@@ -166,22 +169,19 @@ class ChatViewModel: ObservableObject {
     }
     
     private func setupStreamingASRCallbacks() {
-        // 部分识别结果回调（立即触发界面关闭）
+        // 部分识别结果回调（实时显示，可选）
         streamingASRService.onPartialResult = { [weak self] partialText in
-            print("[StreamASR] 检测到断句，立即关闭界面: \(partialText)")
-            Task {
-                await MainActor.run {
-                    self?.isRecording = false  // 立即关闭语音界面
-                }
-            }
+            print("[StreamASR] 部分结果: \(partialText)")
+            // 可以选择在UI中显示实时识别结果
         }
         
-        // 最终识别结果回调（后台识别完成，添加消息并触发AI回复）
+        // 最终识别结果回调（自动触发AI回复）
         streamingASRService.onFinalResult = { [weak self] finalText in
-            print("[StreamASR] 后台识别完成: \(finalText)")
+            print("[StreamASR] 最终结果: \(finalText)")
             Task {
                 await MainActor.run {
                     guard let self = self else { return }
+                    self.isRecording = false
                     
                     if !finalText.isEmpty {
                         let userMessage = Message(text: finalText, isFromUser: true)
@@ -192,13 +192,13 @@ class ChatViewModel: ObservableObject {
             }
         }
         
-        // 错误处理回调
+        // 错误处理回调（静默处理，不显示给用户）
         streamingASRService.onError = { [weak self] error in
             print("[StreamASR][Error] \(error.localizedDescription)")
             Task {
                 await MainActor.run {
                     self?.isRecording = false
-                    self?.errorMessage = "语音识别错误：\(error.localizedDescription)"
+                    // 不显示错误信息，让用户可以重新尝试
                 }
             }
         }
