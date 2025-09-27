@@ -30,7 +30,7 @@ struct SearchBar: View {
 }
 
 #Preview {
-    @State var searchText = ""
+    @Previewable @State var searchText = ""
     return SearchBar(text: $searchText, placeholder: "搜索单词、短语或句子...")
         .padding()
         .background(AppColors.background)

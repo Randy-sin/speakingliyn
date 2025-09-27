@@ -57,7 +57,7 @@ struct ChatInputView: View {
 }
 
 #Preview {
-    @State var inputText = ""
+    @Previewable @State var inputText = ""
     return ChatInputView(
         inputText: $inputText,
         onSendMessage: {},

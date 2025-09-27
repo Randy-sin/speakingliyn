@@ -19,7 +19,7 @@ class ServiceContainer: ObservableObject {
     lazy var audioPlayerService: AudioServiceProtocol = AudioService()
     lazy var fileUploadService: FileUploadServiceProtocol = FileUploadService()
     lazy var asrService: QwenASRServiceProtocol = QwenASRService(fileUploadService: fileUploadService)
-    lazy var recorderService: AudioRecorderServiceProtocol = AudioRecorderService()
+    lazy var streamingASRService: StreamingASRServiceProtocol = StreamingASRService(asrService: asrService, fileUploadService: fileUploadService)
     lazy var analyticsService: AnalyticsServiceProtocol = AnalyticsService()
     
     private init() {}
@@ -33,8 +33,7 @@ class ServiceContainer: ObservableObject {
         ChatViewModel(
             aiService: aiService,
             audioPlayerService: audioPlayerService,
-            asrService: asrService,
-            recorderService: recorderService
+            streamingASRService: streamingASRService
         )
     }
     

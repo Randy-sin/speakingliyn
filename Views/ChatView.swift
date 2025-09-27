@@ -53,6 +53,13 @@ struct ChatView: View {
             )
             .onAppear { viewModel.startRecording() }
         }
+        .onChange(of: viewModel.isRecording) {
+            // 当语音识别自动完成时（isRecording变为false），自动关闭语音界面
+            if !viewModel.isRecording && showingVoiceAssistant {
+                print("[Voice] 语音识别完成，自动关闭界面")
+                showingVoiceAssistant = false
+            }
+        }
         .alert("错误", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("确定") { viewModel.errorMessage = nil }
         } message: {
@@ -75,7 +82,7 @@ struct ChatView: View {
                 .padding(.vertical, AppSpacing.md)
             }
             .background(AppColors.background)
-            .onChange(of: viewModel.messages.count) { _ in
+            .onChange(of: viewModel.messages.count) {
                 if let lastMessage = viewModel.messages.last {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)

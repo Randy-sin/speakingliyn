@@ -34,7 +34,7 @@ final class AudioRecorderService: NSObject, AudioRecorderServiceProtocol {
         
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
             try session.setActive(true)
             isSessionConfigured = true
             print("[Audio] Session pre-configured successfully")
