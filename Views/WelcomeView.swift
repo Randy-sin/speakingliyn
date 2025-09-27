@@ -11,7 +11,7 @@ struct WelcomeView: View {
     @State private var animateTitle = false
     @State private var animateSubtitle = false
     @State private var animateButton = false
-    @State private var showMainApp = false
+    @State private var showChatApp = false
     
     var body: some View {
         ZStack {
@@ -55,7 +55,7 @@ struct WelcomeView: View {
                 // 开始按钮
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        showMainApp = true
+                        showChatApp = true
                     }
                 }) {
                     HStack(spacing: AppSpacing.xs) {
@@ -79,8 +79,8 @@ struct WelcomeView: View {
             }
             .padding(.horizontal, AppSpacing.xl)
         }
-        .fullScreenCover(isPresented: $showMainApp) {
-            MainTabView()
+        .fullScreenCover(isPresented: $showChatApp) {
+            ChatView()
         }
         .onAppear {
             animateTitle = true

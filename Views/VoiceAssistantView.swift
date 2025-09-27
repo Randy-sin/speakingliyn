@@ -26,16 +26,25 @@ struct VoiceAssistantView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: AppSpacing.xxxl) {
+            VStack(spacing: 0) {
                 header
-                animatedOrb
-                promptSection
+                
+                Spacer(minLength: 60)
+                
+                VStack(spacing: AppSpacing.xxxl) {
+                    animatedOrb
+                    promptSection
+                }
+                
+                Spacer(minLength: 80)
+                
                 actionButtons
+                    .padding(.bottom, 40)
             }
             .padding(.horizontal, AppSpacing.xxl)
-            .padding(.vertical, AppSpacing.xxxl)
         }
         .interactiveDismissDisabled(true)
+        .statusBarHidden()
         .onAppear {
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
                 waveformPhase = 40
@@ -45,18 +54,13 @@ struct VoiceAssistantView: View {
     
     private var header: some View {
         HStack {
-            Button(action: cancelAction) {
-                headerButton(icon: "chevron.down")
-            }
-            Spacer()
-            Text("语音练习")
-                .font(AppFonts.subheadline)
-                .foregroundColor(AppColors.secondary)
             Spacer()
             Button(action: cancelAction) {
                 headerButton(icon: "xmark")
             }
         }
+        .padding(.top, 20)
+        .padding(.bottom, 20)
     }
     
     private func headerButton(icon: String) -> some View {
@@ -79,72 +83,79 @@ struct VoiceAssistantView: View {
                             AppColors.gradientStart
                         ]),
                         center: .center,
-                        startRadius: 40,
-                        endRadius: 160
+                        startRadius: 60,
+                        endRadius: 200
                     )
                 )
-                .frame(width: 260, height: 260)
-                .shadow(color: AppShadow.light, radius: 40, x: 0, y: 20)
+                .frame(width: 320, height: 320)
+                .shadow(color: AppShadow.light, radius: 60, x: 0, y: 30)
                 .overlay(
                     Circle()
-                        .stroke(AppColors.accent.opacity(0.18), lineWidth: 22)
+                        .stroke(AppColors.accent.opacity(0.18), lineWidth: 28)
                 )
             
             Circle()
-                .stroke(AppColors.accent.opacity(0.4), style: StrokeStyle(lineWidth: 3, dash: [12, 16], dashPhase: waveformPhase))
-                .frame(width: 280, height: 280)
+                .stroke(AppColors.accent.opacity(0.4), style: StrokeStyle(lineWidth: 4, dash: [16, 20], dashPhase: waveformPhase))
+                .frame(width: 360, height: 360)
                 .animation(.linear(duration: 6).repeatForever(autoreverses: false), value: waveformPhase)
         }
     }
     
     private var promptSection: some View {
-        VStack(spacing: AppSpacing.sm) {
+        VStack(spacing: AppSpacing.md) {
             Text(isListening ? "我正在聆听" : "点击继续语音")
-                .font(AppFonts.title2)
+                .font(AppFonts.title1)
+                .fontWeight(.semibold)
                 .foregroundColor(AppColors.primary)
             
-            Text("描述你想练习的场景，或直接开始说话")
-                .font(AppFonts.callout)
+            Text("请说出你想练习的内容\n系统会自动检测语音结束")
+                .font(AppFonts.body)
                 .foregroundColor(AppColors.secondary)
                 .multilineTextAlignment(.center)
+                .lineSpacing(4)
         }
+        .padding(.horizontal, AppSpacing.lg)
     }
     
     private var actionButtons: some View {
         VStack(spacing: AppSpacing.lg) {
-            HStack(spacing: AppSpacing.md) {
+            HStack(spacing: AppSpacing.xl) {
                 Button(action: { isListening.toggle() }) {
-                    actionButton(icon: isListening ? "pause.circle.fill" : "mic.fill", title: isListening ? "暂停" : "继续", tint: AppColors.primary)
+                    actionButton(
+                        icon: isListening ? "pause.circle.fill" : "mic.fill", 
+                        title: isListening ? "暂停" : "继续", 
+                        tint: AppColors.primary
+                    )
                 }
-                Button(action: {}) {
-                    actionButton(icon: "square.and.arrow.up.fill", title: "上传", tint: AppColors.primary)
-                }
-                Button(action: {}) {
-                    actionButton(icon: "video.circle.fill", title: "视频", tint: AppColors.primary)
-                }
+                
                 Button(action: stopAction) {
-                    actionButton(icon: "xmark.circle.fill", title: "结束", tint: AppColors.destructive)
+                    actionButton(
+                        icon: "stop.circle.fill", 
+                        title: "完成", 
+                        tint: AppColors.accent
+                    )
                 }
             }
             
-            Text("内容由 AI 生成")
+            Text("正在使用 AI 智能识别")
                 .font(AppFonts.caption1)
-                .foregroundColor(AppColors.tertiary)
+                .foregroundColor(AppColors.tertiary.opacity(0.8))
         }
     }
     
     private func actionButton(icon: String, title: String, tint: Color) -> some View {
-        VStack(spacing: AppSpacing.xs) {
+        VStack(spacing: AppSpacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 32, weight: .semibold))
             Text(title)
-                .font(AppFonts.subheadline)
+                .font(AppFonts.callout)
+                .fontWeight(.medium)
         }
         .foregroundColor(tint)
-        .frame(width: 72, height: 72)
-        .background(AppColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous))
-        .shadow(color: AppShadow.light, radius: 12, x: 0, y: 10)
+        .frame(width: 100, height: 100)
+        .background(AppColors.surface.opacity(0.9))
+        .clipShape(RoundedRectangle(cornerRadius: AppRadius.xl, style: .continuous))
+        .shadow(color: AppShadow.light, radius: 20, x: 0, y: 15)
     }
     
     private func stopAction() {

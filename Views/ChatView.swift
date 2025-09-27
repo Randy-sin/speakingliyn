@@ -20,19 +20,27 @@ struct ChatView: View {
                 chatInput
             }
             .background(AppColors.background)
-            .navigationTitle("AI 对话")
+            .navigationTitle("Speaking")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("完成") { dismiss() }
+                    Button("返回") { dismiss() }
                         .font(AppFonts.callout)
                         .foregroundColor(AppColors.accent)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        Button("清除对话") { viewModel.clearChat() }
-                        Button("分享对话") { viewModel.shareChat() }
+                        Button("清除对话", role: .destructive) { 
+                            viewModel.clearChat() 
+                        }
+                        Divider()
+                        Button("分享对话") { 
+                            viewModel.shareChat() 
+                        }
+                        Button("设置") { 
+                            // 可以后续添加设置功能
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .foregroundColor(AppColors.primary)
@@ -40,7 +48,7 @@ struct ChatView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingVoiceAssistant) {
+        .fullScreenCover(isPresented: $showingVoiceAssistant) {
             VoiceAssistantView(
                 onStop: {
                     viewModel.stopRecording()
