@@ -168,6 +168,9 @@ final class StreamingASRService: NSObject, StreamingASRServiceProtocol, @uncheck
             // 检测到声音
             lastSpeechTime = now
             
+            // 显示正在识别状态
+            onPartialResult?("正在识别...")
+            
             // 取消静音计时器
             await MainActor.run {
                 silenceTimer?.invalidate()

@@ -19,6 +19,7 @@ class ChatViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var keyboardHeight: CGFloat = 0
+    @Published var currentRecognitionText = "" // 实时识别的文字
     
     // MARK: - Properties
     private var cancellables = Set<AnyCancellable>()
@@ -172,7 +173,12 @@ class ChatViewModel: ObservableObject {
         // 部分识别结果回调（实时显示，可选）
         streamingASRService.onPartialResult = { [weak self] partialText in
             print("[StreamASR] 部分结果: \(partialText)")
-            // 可以选择在UI中显示实时识别结果
+            Task {
+                await MainActor.run {
+                    self?.currentRecognitionText = partialText
+                }
+            }
+        }
         }
         
         // 最终识别结果回调（自动触发AI回复）
@@ -182,6 +188,9 @@ class ChatViewModel: ObservableObject {
                 await MainActor.run {
                     guard let self = self else { return }
                     self.isRecording = false
+                    
+                    // 清空实时识别文字
+                    self.currentRecognitionText = ""
                     
                     if !finalText.isEmpty {
                         let userMessage = Message(text: finalText, isFromUser: true)

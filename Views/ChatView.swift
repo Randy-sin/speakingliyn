@@ -50,6 +50,7 @@ struct ChatView: View {
         }
         .fullScreenCover(isPresented: $showingVoiceAssistant) {
             VoiceAssistantView(
+                recognitionText: viewModel.currentRecognitionText,
                 onStop: {
                     viewModel.stopRecording()
                     showingVoiceAssistant = false

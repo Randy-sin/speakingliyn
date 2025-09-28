@@ -10,6 +10,7 @@ import SwiftUI
 struct VoiceAssistantView: View {
     var onStop: (() -> Void)?
     var onCancel: (() -> Void)?
+    let recognitionText: String // 实时识别的文字
     @Environment(\.dismiss) private var dismiss
     @State private var isListening = true
     @State private var waveformPhase: CGFloat = 0
@@ -113,6 +114,19 @@ struct VoiceAssistantView: View {
                 .foregroundColor(AppColors.secondary)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
+            
+            // 实时识别结果显示
+            if !recognitionText.isEmpty {
+                Text(recognitionText)
+                    .font(AppFonts.title2)
+                    .fontWeight(.medium)
+                    .foregroundColor(AppColors.accent)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(AppColors.surface.opacity(0.9))
+                    .cornerRadius(AppRadius.lg)
+                    .animation(.easeInOut(duration: 0.2), value: recognitionText)
+            }
         }
         .padding(.horizontal, AppSpacing.lg)
     }
@@ -170,5 +184,5 @@ struct VoiceAssistantView: View {
 }
 
 #Preview {
-    VoiceAssistantView()
+    VoiceAssistantView(recognitionText: "正在识别语音...")
 }
