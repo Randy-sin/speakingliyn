@@ -18,7 +18,7 @@ protocol StreamingASRServiceProtocol: AnyObject {
 }
 
 // MARK: - 按照Fun-ASR文档优化的语音识别
-final class StreamingASRService: NSObject, StreamingASRServiceProtocol {
+final class StreamingASRService: NSObject, StreamingASRServiceProtocol, @unchecked Sendable {
     
     // 回调
     var onPartialResult: ((String) -> Void)?
@@ -68,9 +68,9 @@ final class StreamingASRService: NSObject, StreamingASRServiceProtocol {
         lastSpeechTime = nil
         
         // 设置最大录音时间保护
-        await MainActor.run {
-            maxTimeTimer = Timer.scheduledTimer(withTimeInterval: maxRecordingTime, repeats: false) { [weak self] _ in
-                Task { await self?.handleMaxTimeReached() }
+        await MainActor.run { [weak self] in
+            self?.maxTimeTimer = Timer.scheduledTimer(withTimeInterval: maxRecordingTime, repeats: false) { _ in
+                Task { [weak self] in await self?.handleMaxTimeReached() }
             }
         }
         
@@ -179,9 +179,9 @@ final class StreamingASRService: NSObject, StreamingASRServiceProtocol {
             let silenceTime = now.timeIntervalSince(lastSpeech)
             
             if silenceTime >= maxSentenceSilence && silenceTimer == nil {
-                await MainActor.run {
-                    silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
-                        Task { await self?.handleSilenceDetected() }
+                await MainActor.run { [weak self] in
+                    self?.silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+                        Task { [weak self] in await self?.handleSilenceDetected() }
                     }
                 }
             }
