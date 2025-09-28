@@ -9,9 +9,8 @@ import Foundation
 import SwiftUI
 
 // MARK: - Service Container
-@MainActor
 class ServiceContainer: ObservableObject {
-    nonisolated static let shared = ServiceContainer()
+    static let shared = ServiceContainer()
     
     // MARK: - Services
     lazy var userService: UserServiceProtocol = UserService()
