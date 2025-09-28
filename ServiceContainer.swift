@@ -24,10 +24,12 @@ class ServiceContainer: ObservableObject {
     private init() {}
     
     // MARK: - Factory Methods
+    @MainActor
     func makeHomeViewModel() -> HomeViewModel {
         HomeViewModel(userService: userService)
     }
     
+    @MainActor
     func makeChatViewModel() -> ChatViewModel {
         ChatViewModel(
             aiService: aiService,
@@ -36,6 +38,7 @@ class ServiceContainer: ObservableObject {
         )
     }
     
+    @MainActor
     func makeUserViewModel() -> UserViewModel {
         UserViewModel(userService: userService, analyticsService: analyticsService)
     }
