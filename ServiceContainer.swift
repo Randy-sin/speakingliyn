@@ -11,7 +11,7 @@ import SwiftUI
 // MARK: - Service Container
 @MainActor
 class ServiceContainer: ObservableObject {
-    static let shared = ServiceContainer()
+    nonisolated static let shared = ServiceContainer()
     
     // MARK: - Services
     lazy var userService: UserServiceProtocol = UserService()
@@ -44,7 +44,7 @@ class ServiceContainer: ObservableObject {
 
 // MARK: - Environment Key
 struct ServiceContainerKey: EnvironmentKey {
-    nonisolated static let defaultValue = ServiceContainer.shared
+    static let defaultValue = ServiceContainer.shared
 }
 
 // MARK: - Environment Values Extension
