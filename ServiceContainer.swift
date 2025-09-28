@@ -43,9 +43,8 @@ class ServiceContainer: ObservableObject {
 }
 
 // MARK: - Environment Key
-@MainActor
 struct ServiceContainerKey: EnvironmentKey {
-    static let defaultValue = ServiceContainer.shared
+    nonisolated static let defaultValue = ServiceContainer.shared
 }
 
 // MARK: - Environment Values Extension

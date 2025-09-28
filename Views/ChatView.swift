@@ -50,7 +50,6 @@ struct ChatView: View {
         }
         .fullScreenCover(isPresented: $showingVoiceAssistant) {
             VoiceAssistantView(
-                recognitionText: viewModel.currentRecognitionText,
                 onStop: {
                     viewModel.stopRecording()
                     showingVoiceAssistant = false
@@ -58,7 +57,8 @@ struct ChatView: View {
                 onCancel: {
                     viewModel.cancelRecording()
                     showingVoiceAssistant = false
-                }
+                },
+                recognitionText: viewModel.currentRecognitionText
             )
             .onAppear { viewModel.startRecording() }
         }
