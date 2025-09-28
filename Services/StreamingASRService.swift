@@ -69,7 +69,7 @@ final class StreamingASRService: NSObject, StreamingASRServiceProtocol, @uncheck
         
         // 设置最大录音时间保护
         await MainActor.run { [weak self] in
-            self?.maxTimeTimer = Timer.scheduledTimer(withTimeInterval: maxRecordingTime, repeats: false) { _ in
+            self?.maxTimeTimer = Timer.scheduledTimer(withTimeInterval: self?.maxRecordingTime ?? 10.0, repeats: false) { _ in
                 Task { [weak self] in await self?.handleMaxTimeReached() }
             }
         }

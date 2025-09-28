@@ -179,7 +179,6 @@ class ChatViewModel: ObservableObject {
                 }
             }
         }
-        }
         
         // 最终识别结果回调（自动触发AI回复）
         streamingASRService.onFinalResult = { [weak self] finalText in
